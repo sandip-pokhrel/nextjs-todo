@@ -9,7 +9,7 @@ interface ITodo {
   id: string;
   isCompleted: boolean;
 }
-// todo
+// todofortomorrow
 // Completed todos at last
 // Display picture in each todo
 
