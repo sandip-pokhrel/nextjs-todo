@@ -9,6 +9,9 @@ interface ITodo {
   id: string;
   isCompleted: boolean;
 }
+// todo
+// Completed todos at last
+// Display picture in each todo
 
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
