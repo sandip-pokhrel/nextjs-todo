@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { API } from "../utils/axios";
 import { AxiosResponse } from "axios";
 
+// TODO: use star wars people API to get the list of People which when clicked gives a list of starships they have
+
 interface ITodo {
   title: string;
   id: string;
