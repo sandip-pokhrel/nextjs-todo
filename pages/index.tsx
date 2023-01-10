@@ -35,7 +35,6 @@ export default function Home() {
         }}
       ></input>
       <br />
-      <label>Image URL</label>
 
       <br />
       <button
