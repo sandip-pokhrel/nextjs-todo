@@ -8,6 +8,7 @@ interface ITodo {
   title: string;
   id: string;
   isCompleted: boolean;
+  image: string;
 }
 // todofortomorrow
 // Completed todos at last
@@ -16,6 +17,8 @@ interface ITodo {
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
+  const [image, setImage] = useState("");
+
   const sortedTodos = todos.sort((a, b) => {
     if (a.isCompleted === b.isCompleted) return 0;
     return a.isCompleted ? 1 : -1;
@@ -36,19 +39,36 @@ export default function Home() {
           setTitle(event.target.value);
         }}
       ></input>
-
+      <br />
+      <label>Image URL</label>
+      <input
+        type="url"
+        value={image}
+        onChange={(event) => {
+          setImage(event?.target.value);
+        }}
+      ></input>
+      <br />
       <button
         onClick={() => {
           if (!title) return;
+          if (!image) return;
           setTodos([
             ...todos,
-            { title: title, isCompleted: false, id: Math.random().toString() },
+            {
+              title: title,
+              isCompleted: false,
+              id: Math.random().toString(),
+              image: image,
+            },
           ]);
           setTitle("");
+          setImage("");
         }}
       >
         Save
       </button>
+      <br />
       <br />
       {sortedTodos.map((eachTodo) => (
         <div
@@ -57,7 +77,9 @@ export default function Home() {
           }}
           key={eachTodo.id}
         >
-          {eachTodo.title}
+          <h3>{eachTodo.title}</h3>
+          <img src={eachTodo.image} width="200" height="100"></img>
+
           <button
             onClick={() => {
               const changedTodos = todos.map((item) => {
