@@ -16,6 +16,10 @@ interface ITodo {
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
+  const sortedTodos = todos.sort((a, b) => {
+    if (a.isCompleted === b.isCompleted) return 0;
+    return a.isCompleted ? 1 : -1;
+  });
   return (
     <>
       <Head>
@@ -46,7 +50,7 @@ export default function Home() {
         Save
       </button>
       <br />
-      {todos.map((eachTodo) => (
+      {sortedTodos.map((eachTodo) => (
         <div
           style={{
             color: eachTodo.isCompleted ? "red" : "black",
@@ -70,7 +74,6 @@ export default function Home() {
           >
             Completed
           </button>
-
           <button
             onClick={() => {
               const filteredTodos = todos.filter((item) => {
