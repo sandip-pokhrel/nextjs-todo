@@ -2,22 +2,60 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
 import styles from "../styles/Home.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { API } from "../utils/axios";
+import { AxiosResponse } from "axios";
 
 interface ITodo {
   title: string;
   id: string;
   isCompleted: boolean;
 }
-// todofortomorrow
-// Completed todos at last
-// Display picture in each todo
+
+interface SWPlanet {
+  climate: string;
+  diameter: number;
+  gravity: string;
+  name: string;
+  orbital_period: number;
+  population: number;
+  residents: string[];
+  rotation_period: number;
+  surface_water: number;
+  terrain: string;
+  url: string;
+}
+
+interface WrappedPlanets {
+  count: number;
+  next: string;
+  prev: string;
+  results: SWPlanet[];
+}
 
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
+  const [planets, setPlanets] = useState<SWPlanet[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const sortedTodos = todos.sort(a => a.isCompleted ? 1 : -1);
+  const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
+
+  const fetchPlanets = async () => {
+    try {
+      setLoading(true);
+      const planets3: AxiosResponse<WrappedPlanets> = await API.get("planets/");
+      setPlanets(planets3.data.results);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchPlanets();
+  }, []);
+
   return (
     <>
       <Head>
@@ -92,6 +130,22 @@ export default function Home() {
           </button>
         </div>
       ))}
+      <div>
+        <p>Climates are:</p>
+        {loading
+          ? "loading...."
+          : planets.map((planet) => {
+              return planet.climate.includes("temperate") ? (
+                <div>{planet.name}</div>
+              ) : null;
+            })}
+      </div>
+      {/* <div>
+        <p>Climates are:</p>
+        {planets.map((planet) => {
+          return <div>{planet.climate}</div>;
+        })}
+      </div> */}
     </>
   );
 }
