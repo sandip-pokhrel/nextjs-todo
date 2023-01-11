@@ -36,11 +36,38 @@ interface WrappedPlanets {
   results: SWPlanet[];
 }
 
+interface EachPeople {
+  name: string;
+  starships: EachStarships[];
+}
+
+interface SWPeoples {
+  count: number;
+  next: string;
+  prev: string;
+  results: EachPeople[];
+}
+
+interface EachStarships {
+  name: string;
+  manufacturer: string;
+  pilots: string[];
+}
+
+interface SWStarships {
+  count: number;
+  next: string;
+  prev: string;
+  results: EachStarships[];
+}
+
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
   const [planets, setPlanets] = useState<SWPlanet[]>([]);
   const [loading, setLoading] = useState(false);
+  const [people, setPeople] = useState<EachPeople[]>([]);
+  const [starship, setStarships] = useState<EachStarships[]>([]);
 
   const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
 
@@ -57,6 +84,40 @@ export default function Home() {
   };
   useEffect(() => {
     fetchPlanets();
+  }, []);
+
+  const fetchPeople = async () => {
+    try {
+      setLoading(true);
+      const allpeople: AxiosResponse<SWPeoples> = await API.get("people/");
+      setPeople(allpeople.data.results);
+      console.log(allpeople.data.results);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchPeople();
+  }, []);
+
+  const fetchStarships = async () => {
+    try {
+      setLoading(true);
+      const allStarships: AxiosResponse<SWStarships> = await API.get(
+        "starships/"
+      );
+      setStarships(allStarships.data.results);
+      console.log(allStarships.data.results);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchStarships();
   }, []);
 
   return (
@@ -133,7 +194,7 @@ export default function Home() {
           </button>
         </div>
       ))}
-      <div>
+      {/* <div>
         <p>Climates are:</p>
         {loading
           ? "loading...."
@@ -143,12 +204,32 @@ export default function Home() {
               ) : null;
             })}
       </div>
-      {/* <div>
-        <p>Climates are:</p>
-        {planets.map((planet) => {
-          return <div>{planet.climate}</div>;
+      <br /> */}
+      <div>
+        <h2>Available Peoples:</h2>
+        <br />
+        {loading
+          ? "loading...."
+          : people.map((people) => {
+              return (
+                <div>
+                  <button onClick={() => {}}>{people.name}</button>
+                </div>
+              );
+            })}
+      </div>
+      <br />
+      <div>
+        <h2>Available Starships:</h2>
+        <br />
+        {starship.map((ships) => {
+          return (
+            <div>
+              <button>{ships.name}</button>
+            </div>
+          );
         })}
-      </div> */}
+      </div>
     </>
   );
 }
