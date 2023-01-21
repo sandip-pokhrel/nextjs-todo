@@ -5,6 +5,7 @@ import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
 import { API } from "../utils/axios";
 import { AxiosResponse } from "axios";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 // TODO: make a popup component to display the starship's Name
 // use star wars people API to get the list of People which when clicked gives a list of starships they have
@@ -70,6 +71,7 @@ export default function Home() {
   const [starship, setStarships] = useState<EachStarships[]>([]);
 
   const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
+  const [animationParent] = useAutoAnimate();
 
   const fetchPlanets = async () => {
     try {
@@ -157,43 +159,45 @@ export default function Home() {
       </button>
       <br />
       <br />
-      {sortedTodos.map((eachTodo) => (
-        <div
-          style={{
-            color: eachTodo.isCompleted ? "red" : "black",
-          }}
-          key={eachTodo.id}
-        >
-          <h3>{eachTodo.title}</h3>
+      <div ref={animationParent}>
+        {sortedTodos.map((eachTodo) => (
+          <div
+            style={{
+              color: eachTodo.isCompleted ? "red" : "white",
+            }}
+            key={eachTodo.id}
+          >
+            <h3>{eachTodo.title}</h3>
 
-          <button
-            onClick={() => {
-              const changedTodos = todos.map((item) => {
-                return {
-                  ...item,
-                  isCompleted:
-                    eachTodo.id === item.id
-                      ? !item.isCompleted
-                      : item.isCompleted,
-                };
-              });
-              setTodos(changedTodos);
-            }}
-          >
-            Completed
-          </button>
-          <button
-            onClick={() => {
-              const filteredTodos = todos.filter((item) => {
-                return eachTodo.id !== item.id;
-              });
-              setTodos(filteredTodos);
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      ))}
+            <button
+              onClick={() => {
+                const changedTodos = todos.map((item) => {
+                  return {
+                    ...item,
+                    isCompleted:
+                      eachTodo.id === item.id
+                        ? !item.isCompleted
+                        : item.isCompleted,
+                  };
+                });
+                setTodos(changedTodos);
+              }}
+            >
+              Completed
+            </button>
+            <button
+              onClick={() => {
+                const filteredTodos = todos.filter((item) => {
+                  return eachTodo.id !== item.id;
+                });
+                setTodos(filteredTodos);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
       {/* <div>
         <p>Climates are:</p>
         {loading
