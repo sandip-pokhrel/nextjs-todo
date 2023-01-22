@@ -37,19 +37,19 @@ interface WrappedPlanets {
   results: SWPlanet[];
 }
 
-interface EachPeople {
+interface People {
   name: string;
-  starships: EachStarships[];
+  starships: Starships[];
 }
 
 interface SWPeoples {
   count: number;
   next: string;
   prev: string;
-  results: EachPeople[];
+  results: People[];
 }
 
-interface EachStarships {
+interface Starships {
   name: string;
   manufacturer: string;
   pilots: string[];
@@ -59,7 +59,7 @@ interface SWStarships {
   count: number;
   next: string;
   prev: string;
-  results: EachStarships[];
+  results: Starships[];
 }
 
 export default function Home() {
@@ -67,26 +67,26 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [planets, setPlanets] = useState<SWPlanet[]>([]);
   const [loading, setLoading] = useState(false);
-  const [people, setPeople] = useState<EachPeople[]>([]);
-  const [starship, setStarships] = useState<EachStarships[]>([]);
+  const [people, setPeople] = useState<People[]>([]);
+  const [starship, setStarships] = useState<Starships[]>([]);
 
   const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
   const [animationParent] = useAutoAnimate();
 
-  const fetchPlanets = async () => {
-    try {
-      setLoading(true);
-      const planets3: AxiosResponse<WrappedPlanets> = await API.get("planets/");
-      setPlanets(planets3.data.results);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchPlanets();
-  }, []);
+  // const fetchPlanets = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const planets3: AxiosResponse<WrappedPlanets> = await API.get("planets/");
+  //     setPlanets(planets3.data.results);
+  //   } catch (e) {
+  //     console.log(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   fetchPlanets();
+  // }, []);
 
   const fetchPeople = async () => {
     try {
@@ -104,23 +104,23 @@ export default function Home() {
     fetchPeople();
   }, []);
 
-  const fetchStarships = async () => {
-    try {
-      setLoading(true);
-      const allStarships: AxiosResponse<SWStarships> = await API.get(
-        "starships/"
-      );
-      setStarships(allStarships.data.results);
-      console.log(allStarships.data.results);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchStarships();
-  }, []);
+  // const fetchStarships = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const allStarships: AxiosResponse<SWStarships> = await API.get(
+  //       "starships/"
+  //     );
+  //     setStarships(allStarships.data.results);
+  //     console.log(allStarships.data.results);
+  //   } catch (e) {
+  //     console.log(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   fetchStarships();
+  // }, []);
 
   return (
     <>
@@ -223,7 +223,7 @@ export default function Home() {
             })}
       </div>
       <br />
-      <div>
+      {/* <div>
         <h2>Available Starships:</h2>
         <br />
         {starship.map((ships) => {
@@ -233,7 +233,7 @@ export default function Home() {
             </div>
           );
         })}
-      </div>
+      </div> */}
     </>
   );
 }
