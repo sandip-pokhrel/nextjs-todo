@@ -214,9 +214,9 @@ export default function Home() {
         <br />
         {loading
           ? "loading...."
-          : people.map((people) => {
+          : people.map((people, index) => {
               return (
-                <div>
+                <div key={index}>
                   <button onClick={() => {}}>{people.name}</button>
                 </div>
               );
