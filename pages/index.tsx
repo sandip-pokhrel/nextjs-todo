@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { API } from "../utils/axios";
 import { AxiosResponse } from "axios";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { QueryFunction, useQuery } from "@tanstack/react-query";
 
 // TODO: make a popup component to display the starship's Name
 // use star wars people API to get the list of People which when clicked gives a list of starships they have
@@ -66,8 +67,6 @@ export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
   const [planets, setPlanets] = useState<SWPlanet[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [people, setPeople] = useState<People[]>([]);
   const [starship, setStarships] = useState<Starships[]>([]);
 
   const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
@@ -88,21 +87,26 @@ export default function Home() {
   //   fetchPlanets();
   // }, []);
 
-  const fetchPeople = async () => {
-    try {
-      setLoading(true);
-      const allpeople: AxiosResponse<SWPeoples> = await API.get("people/");
-      setPeople(allpeople.data.results);
-      console.log(allpeople.data.results);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
+  const fetchPeople: QueryFunction<{data: SWPeoples}> = async () => {
+      const {data} = await API.get("people/");
+      return {data}
   };
-  useEffect(() => {
-    fetchPeople();
-  }, []);
+  
+  const {data: people, isLoading, refetch: refetchPeople} = useQuery(['allPeople'], fetchPeople, {
+    cacheTime: 100,
+    staleTime: 10,
+    enabled: false,
+    onError: (err) => {
+      console.log(err)
+    },
+    onSuccess: (data) => {
+      console.log("asd")
+    },
+    // select: (data: SWPeoples) => {
+    //   return data.results[0].name
+    // }
+  })
+
 
   // const fetchStarships = async () => {
   //   try {
@@ -212,9 +216,9 @@ export default function Home() {
       <div>
         <h2>Available Peoples:</h2>
         <br />
-        {loading
+        {isLoading
           ? "loading...."
-          : people.map((people, index) => {
+          : people?.data?.results?.map((people, index) => {
               return (
                 <div key={index}>
                   <button onClick={() => {}}>{people.name}</button>
