@@ -2,8 +2,9 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { API } from "../utils/axios";
 import { AxiosResponse } from "axios";
+import { QueryFunction, useQuery } from "@tanstack/react-query";
 
-interface SWPeople {
+interface SWPeoples {
   count: number;
   next: string;
   prev: string;
@@ -21,23 +22,47 @@ interface Starship {
 }
 
 export default function FirstPost() {
-  const [people, setPeople] = useState<People[]>([]);
+  // const [people, setPeople] = useState<People[]>([]);
   const [loading, setLoading] = useState(false);
   const [starshipLoading, setStarshipLoading] = useState(false);
   const [starships, setStarships] = useState<Starship[]>([]);
 
-  const fetchPeople = async () => {
-    try {
-      setLoading(true);
-      const allpeople: AxiosResponse<SWPeople> = await API.get("people/");
-      setPeople(allpeople.data.results);
-      console.log(allpeople.data.results);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
+  // const fetchPeople = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const allpeople: AxiosResponse<SWPeople> = await API.get("people/");
+  //     setPeople(allpeople.data.results);
+  //     console.log(allpeople.data.results);
+  //   } catch (e) {
+  //     console.log(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetchPeople: QueryFunction<{ data: SWPeoples }> = async () => {
+    const { data } = await API.get("people/");
+    return { data };
   };
+
+  const {
+    data: people,
+    isLoading,
+    refetch: refetchPeople,
+  } = useQuery(["allPeople"], fetchPeople, {
+    cacheTime: 100,
+    staleTime: 10,
+    enabled: true,
+    onError: (err) => {
+      console.log(err);
+    },
+    onSuccess: (data) => {
+      console.log("asd");
+    },
+    // select: (data: SWPeoples) => {
+    //   return data.results[0].name
+    // }
+  });
 
   const fetchAllStarship = async (ids: string[]) => {
     setStarshipLoading(true);
@@ -88,14 +113,12 @@ export default function FirstPost() {
       <div>
         <h2>Available Peoples:</h2>
         <br />
-        {loading
+        {isLoading
           ? "loading...."
-          : people.map((people) => {
+          : people?.data?.results?.map((people, index) => {
               return (
-                <div>
-                  <button onClick={() => handlePeopleClick(people)}>
-                    {people.name}
-                  </button>
+                <div key={index}>
+                  <button onClick={() => {}}>{people.name}</button>
                 </div>
               );
             })}
