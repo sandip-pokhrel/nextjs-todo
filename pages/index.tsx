@@ -5,6 +5,8 @@ import styles from "../styles/Home.module.css";
 import { useEffect, useState } from "react";
 import { API } from "../utils/axios";
 import { AxiosResponse } from "axios";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { QueryFunction, useQuery } from "@tanstack/react-query";
 
 // TODO: make a popup component to display the starship's Name
 // use star wars people API to get the list of People which when clicked gives a list of starships they have
@@ -36,28 +38,93 @@ interface WrappedPlanets {
   results: SWPlanet[];
 }
 
+interface People {
+  name: string;
+  starships: Starships[];
+}
+
+interface SWPeoples {
+  count: number;
+  next: string;
+  prev: string;
+  results: People[];
+}
+
+interface Starships {
+  name: string;
+  manufacturer: string;
+  pilots: string[];
+}
+
+interface SWStarships {
+  count: number;
+  next: string;
+  prev: string;
+  results: Starships[];
+}
+
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [title, setTitle] = useState("");
   const [planets, setPlanets] = useState<SWPlanet[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [starship, setStarships] = useState<Starships[]>([]);
 
   const sortedTodos = todos.sort((a) => (a.isCompleted ? 1 : -1));
+  const [animationParent] = useAutoAnimate();
 
-  const fetchPlanets = async () => {
-    try {
-      setLoading(true);
-      const planets3: AxiosResponse<WrappedPlanets> = await API.get("planets/");
-      setPlanets(planets3.data.results);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
+  // const fetchPlanets = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const planets3: AxiosResponse<WrappedPlanets> = await API.get("planets/");
+  //     setPlanets(planets3.data.results);
+  //   } catch (e) {
+  //     console.log(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   fetchPlanets();
+  // }, []);
+
+  const fetchPeople: QueryFunction<{data: SWPeoples}> = async () => {
+      const {data} = await API.get("people/");
+      return {data}
   };
-  useEffect(() => {
-    fetchPlanets();
-  }, []);
+  
+  const {data: people, isLoading, refetch: refetchPeople} = useQuery(['allPeople'], fetchPeople, {
+    cacheTime: 100,
+    staleTime: 10,
+    enabled: false,
+    onError: (err) => {
+      console.log(err)
+    },
+    onSuccess: (data) => {
+      console.log("asd")
+    },
+    // select: (data: SWPeoples) => {
+    //   return data.results[0].name
+    // }
+  })
+
+
+  // const fetchStarships = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const allStarships: AxiosResponse<SWStarships> = await API.get(
+  //       "starships/"
+  //     );
+  //     setStarships(allStarships.data.results);
+  //     console.log(allStarships.data.results);
+  //   } catch (e) {
+  //     console.log(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   fetchStarships();
+  // }, []);
 
   return (
     <>
@@ -96,44 +163,46 @@ export default function Home() {
       </button>
       <br />
       <br />
-      {sortedTodos.map((eachTodo) => (
-        <div
-          style={{
-            color: eachTodo.isCompleted ? "red" : "black",
-          }}
-          key={eachTodo.id}
-        >
-          <h3>{eachTodo.title}</h3>
+      <div ref={animationParent}>
+        {sortedTodos.map((eachTodo) => (
+          <div
+            style={{
+              color: eachTodo.isCompleted ? "red" : "white",
+            }}
+            key={eachTodo.id}
+          >
+            <h3>{eachTodo.title}</h3>
 
-          <button
-            onClick={() => {
-              const changedTodos = todos.map((item) => {
-                return {
-                  ...item,
-                  isCompleted:
-                    eachTodo.id === item.id
-                      ? !item.isCompleted
-                      : item.isCompleted,
-                };
-              });
-              setTodos(changedTodos);
-            }}
-          >
-            Completed
-          </button>
-          <button
-            onClick={() => {
-              const filteredTodos = todos.filter((item) => {
-                return eachTodo.id !== item.id;
-              });
-              setTodos(filteredTodos);
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      ))}
-      <div>
+            <button
+              onClick={() => {
+                const changedTodos = todos.map((item) => {
+                  return {
+                    ...item,
+                    isCompleted:
+                      eachTodo.id === item.id
+                        ? !item.isCompleted
+                        : item.isCompleted,
+                  };
+                });
+                setTodos(changedTodos);
+              }}
+            >
+              Completed
+            </button>
+            <button
+              onClick={() => {
+                const filteredTodos = todos.filter((item) => {
+                  return eachTodo.id !== item.id;
+                });
+                setTodos(filteredTodos);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+      {/* <div>
         <p>Climates are:</p>
         {loading
           ? "loading...."
@@ -143,10 +212,30 @@ export default function Home() {
               ) : null;
             })}
       </div>
+      <br /> */}
+      <div>
+        <h2>Available Peoples:</h2>
+        <br />
+        {isLoading
+          ? "loading...."
+          : people?.data?.results?.map((people, index) => {
+              return (
+                <div key={index}>
+                  <button onClick={() => {}}>{people.name}</button>
+                </div>
+              );
+            })}
+      </div>
+      <br />
       {/* <div>
-        <p>Climates are:</p>
-        {planets.map((planet) => {
-          return <div>{planet.climate}</div>;
+        <h2>Available Starships:</h2>
+        <br />
+        {starship.map((ships) => {
+          return (
+            <div>
+              <button>{ships.name}</button>
+            </div>
+          );
         })}
       </div> */}
     </>
