@@ -25,7 +25,7 @@ export default function FirstPost() {
   // const [people, setPeople] = useState<People[]>([]);
   const [loading, setLoading] = useState(false);
   const [starshipLoading, setStarshipLoading] = useState(false);
-  const [starships, setStarships] = useState<Starship[]>([]);
+  // const [starships, setStarships] = useState<Starship[]>([]);
 
   // const fetchPeople = async () => {
   //   try {
@@ -64,42 +64,35 @@ export default function FirstPost() {
     // }
   });
 
-  const fetchAllStarship = async (ids: string[]) => {
-    setStarshipLoading(true);
-    const promisesArr = ids.map(
-      async (idx) => await API.get(`starships/${idx}`)
+  const fetchStarships: QueryFunction<{ data: Starship[] }> = async (
+    ids: string[]
+  ) => {
+    const starships = await Promise.all(
+      ids.map(async (idx) => (await API.get(`starships/${idx}`)).data)
     );
-    Promise.all(promisesArr)
-      .then((allStarshipsArr: AxiosResponse<Starship>[]) => {
-        const cleanStarships = allStarshipsArr.map((a) => {
-          const returnObj = {
-            name: a.data.name,
-            manufacturer: a.data.manufacturer,
-          };
-          return returnObj;
-        });
-        setStarships(cleanStarships);
-      })
-      .catch((e) => console.log(e));
-    setStarshipLoading(false);
+    return { data: starships };
   };
 
-  useEffect(() => {
-    fetchPeople();
-  }, []);
+  const { data: starships } = useQuery(["allStarships"], fetchStarships, {
+    cacheTime: 100,
+    staleTime: 10,
+    enabled: true,
+    onError: (err) => {
+      console.error(err);
+    },
+    onSuccess: (data) => {
+      console.log("Starships fetched successfully");
+    },
+  });
 
   const getIdFromURL = (url: string) => {
     const splittedArray = url?.split("/");
     return splittedArray?.[splittedArray?.length - 2];
   };
 
-  const handlePeopleClick = (attr: People) => {
-    setStarships([]);
-    const ids = attr.starships.map((eachUrl) => {
-      return getIdFromURL(eachUrl);
-      // fetch each starship using the id
-    });
-    fetchAllStarship(ids);
+  const handlePeopleClick = (person: People) => {
+    const ids = person.starships.map((eachUrl) => getIdFromURL(eachUrl));
+    fetchStarships(ids);
   };
 
   return (
@@ -126,15 +119,13 @@ export default function FirstPost() {
       <div>
         <h2>current starships:</h2>
         <br />
-        {loading
-          ? "loading...."
-          : starships?.map((starship) => {
-              return (
-                <div>
-                  <button onClick={() => {}}>{starship.name}</button>
-                </div>
-              );
-            })}
+        {starships?.data?.map((a) => {
+          return (
+            <div>
+              <button onClick={() => {}}>{a.name}</button>
+            </div>
+          );
+        })}
       </div>
     </>
   );
